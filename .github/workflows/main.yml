@@ -2,28 +2,31 @@ name: Jira Weekly Reporter
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * MON"   # Runs every Monday at 9AM UTC
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
 
-    env:
-      JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-      GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
-      JIRA_URL: ${{ secrets.JIRA_URL }}
-      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run script
+      - name: Run Jira Reporter
+        env:
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          JIRA_URL: ${{ secrets.JIRA_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
         run: python jira-email-notification.py
