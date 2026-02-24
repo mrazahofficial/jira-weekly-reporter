@@ -7,6 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Load configuration
+# Load .env only if it exists (for local dev)
 load_dotenv()
 
 JIRA_EMAIL = os.getenv("JIRA_EMAIL")
@@ -41,8 +42,10 @@ def get_issues(jql):
 
 def main():
     if not all([JIRA_EMAIL, JIRA_TOKEN, GMAIL_PASS, JIRA_URL]):
-        print("Missing environment variables in .env.example file.")
-        return
+        raise EnvironmentError(
+            "Missing required environment variables: "
+            "JIRA_EMAIL, JIRA_TOKEN, GMAIL_PASS, JIRA_URL"
+    )
 
     # Fetch data for the report
     count_created, list_created = get_issues(f"project={PROJECT_KEY} AND created >= -7d")
